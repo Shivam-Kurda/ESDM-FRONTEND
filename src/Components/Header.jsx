@@ -12,24 +12,20 @@ const Header = () => {
         <div className="flex items-center space-x-4">
           <Link to ="/" className="text-gray-700 hover:text-black font-bold">ESDM HELPER</Link>
           <nav className="hidden md:flex space-x-4">
-            <Link to="/suppliers" className="text-gray-700 hover:text-black">Find Suppliers</Link>
-            <a href="#" className="text-gray-700 hover:text-black">Find Buyers</a>
-            <a href="#" className="text-gray-700 hover:text-black">Insights</a>
-            <div className="relative">
-              <button className="text-gray-700 hover:text-black">Data & Analytics</button>
-              {/* Dropdown menu can be added here */}
-            </div>
-            <a href="#" className="text-gray-700 hover:text-black">Market Overviews</a>
+            <Link to="/suppliers" className="text-gray-700 hover:text-black font-bold">Find Suppliers</Link>
+            <a href="#" className="text-gray-700 hover:text-black font-bold">Find Buyers</a>
+            <a href="#" className="text-gray-700 hover:text-black font-bold">Insights</a>
+            <a href="#" className="text-gray-700 hover:text-black font-bold">Market Overviews</a>
           </nav>
         </div>
         <div className="flex items-center space-x-4">
-          <button className="text-gray-700 hover:text-black">
+          <button className="text-black font-semibold hover:font-bold hover:text-gray-700">
             <i className="fas fa-search"></i>
           </button>
-          <button className="text-gray-700 hover:text-black">
+          <button className="text-black font-semibold hover:font-bold hover:text-gray-700">
             <i className="fas fa-bookmark"></i>
           </button>
-          <button className="text-gray-700 hover:text-black">
+          <button className="text-black font-semibold hover:font-bold hover:text-gray-700">
             <i className="fas fa-globe"></i> EN
           </button>
           {isAuthenticated ? (
