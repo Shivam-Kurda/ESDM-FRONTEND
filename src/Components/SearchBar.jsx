@@ -1,40 +1,48 @@
-// import React from 'react';
-// const SearchBar = ({ searchTerm, setSearchTerm }) => {
-//   return (
-//     <div className="flex justify-center mt-6">
-//       <div className="flex items-center bg-gray-100 rounded-full shadow-md p-4 w-full max-w-2xl">
-//         <i className="fas fa-search text-gray-500 mr-4"></i>
-//         <div className="border-r border-gray-300 h-6 mr-4"></div>
-//         <input
-//           type="text"
-//           placeholder="Search Services or Products"
-//           className="bg-gray-100 outline-none text-gray-700 w-full"
-//           value={searchTerm}
-//           onChange={(e) => setSearchTerm(e.target.value)}
-// />
-//       </div>
-//     </div>
-//   );
-// };
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+function SearchBar(){
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const navigate = useNavigate();
 
-// export default SearchBar;
-import React from 'react';
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:5001/database/getProductList');
+      setProducts(response.data.products || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+  useEffect(() => {
+    fetchProducts();
+    const intervalId = setInterval(fetchProducts, 60000); // Fetch every 60 seconds
+    return () => clearInterval(intervalId);
+  }, []);
+  useEffect(() => {
+    setFilteredProducts(
+      products.filter(product =>
+        product.product_name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [searchTerm, products]);
 
-function SearchBar({ searchTerm, setSearchTerm, filteredProducts, onSelectProduct }) {
+  const onSelectProduct = (product) => {
+    setSearchTerm('');
+    navigate(`/suppliers/${encodeURIComponent(product.product_name)}`);
+  };
+
   return (
     <div className="mb-4 relative mt-4">
-      <div className="flex items-center bg-gray-100 border border-gray-300 rounded p-2">
-        <span className="text-gray-500 mr-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
-          </svg>
-        </span>
+      <div className="flex items-center border border-black rounded-full p-2 w-96">
+        
         <input
           type="text"
-          placeholder="Search products in food and agriculture"
+          placeholder="Search products and Services"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-gray-100 outline-none"
+          className="w-full bg-white outline-none rounded-full px-4 py-2"
         />
       </div>
       {searchTerm && (
@@ -45,7 +53,7 @@ function SearchBar({ searchTerm, setSearchTerm, filteredProducts, onSelectProduc
               onClick={() => onSelectProduct(product)}
               className="p-2 cursor-pointer hover:bg-gray-200"
             >
-              {product}
+              {product.product_name}
             </li>
           ))}
         </ul>
@@ -53,5 +61,4 @@ function SearchBar({ searchTerm, setSearchTerm, filteredProducts, onSelectProduc
     </div>
   );
 }
-
 export default SearchBar;

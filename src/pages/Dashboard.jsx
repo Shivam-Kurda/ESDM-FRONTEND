@@ -4,13 +4,14 @@ import Sidebar from '../Components/Sidebar';
 import { Outlet } from 'react-router-dom';
 import { useAuth0 } from "@auth0/auth0-react";
 import Header from '../Components/Header';
+import Footer from '../Components/Footer';
 // import Profile from './Profile';
 // Import other page components
 
 const Dashboard = () => {
   const { user, isAuthenticated, isLoading } = useAuth0();
   return (
-      <div className="bg-gray-100 min-h-screen">
+      <div className="bg-white min-h-screen">
         <header className="bg-white p-4 shadow">
           <Header />
         </header>
@@ -20,6 +21,9 @@ const Dashboard = () => {
             <Outlet />
           </div>
         </div>
+        <footer className="bg-white p-4 shadow">
+          <Footer />
+        </footer>
       </div>
   );
 };

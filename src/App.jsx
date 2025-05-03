@@ -16,13 +16,14 @@ import Quotes from './pages/Quotes'
 import Meetings from './pages/Meetings'
 import Analytics from './pages/Analytics'
 function App() {
-  const [count, setCount] = useState(0)
+
 
   return (
     <Routes>
       <Route path="/" element={<Homepage />} />
       <Route path="/Suppliers" element={<Suppliers/>} />
-      <Route path='/supplier/:id' element={<SupplierPage />} />
+      <Route path="/suppliers/:productName" element={<Suppliers />} />
+      <Route path='/supplier/:cin' element={<SupplierPage />} />
       <Route path="/Register" element={<Signup/>} />
       <Route path="/signup-success" element={<SignupSuccess />} />
       <Route path="/login" element={<Login />} />
@@ -32,8 +33,7 @@ function App() {
           <Route path='quotes' element={<Quotes />} />
           <Route path='meetings' element={<Meetings/>} />
           <Route path='analytics' element={<Analytics />} />
-        </Route>
-     
+        </Route>   
     </Routes>
   );
 }

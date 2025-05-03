@@ -4,92 +4,80 @@ import Header from '../Components/Header'
 import SearchBar from '../Components/SearchBar'
 import {Link} from 'react-router-dom'
 import { useState } from 'react'
+import { useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import axios from 'axios'
+
 function Suppliers() {
+  const { productName } = useParams();
+  const [suppliers, setSuppliers] = useState([]);
+  const ProductName = productName;
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState('');
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        let response;
+        if (productName) {
+          response = await axios.get(
+            `http://127.0.0.1:5001/database/getCompanies_Product?ProductName=${encodeURIComponent(ProductName)}`
+          );
+        } else {
+          response = await axios.get('http://127.0.0.1:5001/database/getCompanies_Product');
+        }
+        setSuppliers(response.data || []);
+      } catch (error) {
+        console.error('Error fetching suppliers:', error);
+      }
+    };
 
-  const suppliersData = [
-    {
-      id:0,
-      name: 'Tejas Networks',
-      country: 'India',
-      products: ['PCB Design', 'PCB Manufacturing', 'PCB Assembly'],
+    fetchSuppliers();
+  }, [productName]);
 
-      image: 'link-to-image-1',
-      product: 'Tomato from India',
-      
-    },
-    {
-      id:1,
-      name: 'Dixon Technologies',
-      country: 'India',
-      products: ['PCB Assembly'],
-
-      image: 'link-to-image-2',
-      product: 'Fresh Whole Tomato',
-    },
-    {
-      id:2,
-      name: 'Bharat Electronics Limited',
-      country: 'Egypt',
-      products: ['PCB Manufactruing', 'PCB Assembly'],
-
-      image: 'link-to-image-3',
-      product: 'Fresh Tomato',
-    },
-
-    
-    // Add more suppliers as needed
-  ];
-  const allProducts = Array.from(new Set(suppliersData.flatMap(supplier => supplier.products)));
-
-  const filteredSuppliers = selectedProduct
-    ? suppliersData.filter(supplier =>
-      supplier.products.includes(selectedProduct)
-    )
-    : suppliersData;
-
-  const filteredProducts = allProducts.filter(product =>
-    product.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleSelectProduct = (product) => {
-    setSelectedProduct(product);
-    setSearchTerm('');
-  };
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-white min-h-screen font-sans text-gray-800">
       <Header />
-      <div className="p-4">
-        <SearchBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          filteredProducts={filteredProducts}
-          onSelectProduct={handleSelectProduct}
-        />
-        <h2 className="text-xl font-bold mb-4">{filteredSuppliers.length} results</h2>
-        <h3 className="text-lg font-bold text-left border-b border-black">
-          {selectedProduct}</h3>
-        <div className="grid grid-cols-3 gap-4">
-          {filteredSuppliers.map((supplier, index) => (
-            <Link to={`/supplier/${supplier.id}`} key={supplier.id}>
-            <div key={index} className="bg-white p-4 rounded shadow">
-              <img src={supplier.image} alt={supplier.name} className="w-full h-32 object-cover mb-4" />
-              <h3 className="text-lg font-bold">{supplier.name}</h3>
-              <p className="text-sm text-gray-600">{supplier.country} • Trade</p>
-              <p className="text-sm mt-2">Products: {supplier.products.join(', ')}</p>
-              <div className="mt-4 flex items-center">
-                <span className="text-sm">{supplier.product}</span>
-                <button className="ml-auto bg-blue-500 text-white px-4 py-2 rounded">Contact Now</button>
-              </div>
-            </div>
-            </Link>
-          ))}
-        </div>
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Optional: Title */}
+        {productName && (
+          <h2 className="text-2xl font-semibold text-blue-800 mb-6">
+            Suppliers for "{productName}"
+          </h2>
+        )}
+
+        {/* No suppliers found message */}
+        {suppliers.length === 0 ? (
+          <div className="text-center text-gray-500 text-lg mt-20">
+            No suppliers found for this product/service.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            {suppliers.map((supplier) => (
+              <Link to={`/supplier/${supplier.cin}`} key={supplier.cin}>
+                <div className="border border-blue-100 rounded-2xl overflow-hidden hover:shadow-md transition duration-200">
+                  <img
+                    src={supplier.image}
+                    alt={supplier.companyName}
+                    className="w-full h-40 object-cover"
+                  />
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-blue-800 mb-1">{supplier.companyName}</h3>
+                    <p className="text-sm text-gray-500 mb-3">{supplier.country}</p>
+                    <p className="text-xs text-gray-600 mb-4">CIN: {supplier.cin}</p>
+                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm transition duration-150">
+                      Contact Now
+                    </button>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-export default Suppliers
+export default Suppliers;
+
+
+

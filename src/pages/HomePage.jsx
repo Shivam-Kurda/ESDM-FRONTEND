@@ -3,52 +3,80 @@ import React from 'react';
 import Header from '../Components/Header';
 import SearchBar from '../Components/SearchBar';
 import '../styles.css'
+import Footer from '../Components/Footer';
 const Homepage = () => {
     return (
-      <div className="bg-gray-100 min-h-screen">
-        <Header className="mb-4"/>
-        <SearchBar  className="mt-4"/>
-        <div className="flex flex-col items-center mt-6 space-y-4">
-          <div className="w-full max-w-2xl">
-            <div className="bg-white text-black font-semibold text-lg rounded-lg shadow-md p-4 flex items-center justify-center hover:bg-gray-200 transition-colors">
-              <i className="fas fa-arrow-right mr-2"></i>
-              Try our A.I. Workflow Recommendation
-            </div>
-          </div>
-          <div className="w-full max-w-2xl">
-            <div className="bg-white text-black font-semibold text-lg rounded-lg shadow-md p-4 flex items-center justify-center hover:bg-gray-200 transition-colors">
-              Design your own workflow
-            </div>
+      <div className="bg-white-100 min-h-screen">
+        <Header className="mt-4 mb-4"/>
+        <section className="text-center py-16 bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 mt-4">
+        <h1 className="text-4xl font-bold">
+          From <span className="text-blue-500">Concept</span> to <span className="text-yellow-500">Creation</span>.
+        </h1>
+        <p className="text-xl mt-4">Build your products with ESDM</p>
+        <p className="mt-4 text-gray-600">
+          Connecting products, manufacturers, suppliers, and distributors, streamlining every stage from design and prototyping through production, packaging, marketing, and compliance.
+        </p>
+        <div className="mt-8">
+          <button className="bg-blue-500 text-white px-6 py-2 rounded-full mr-4">Build Your Product</button>
+          <button className="bg-green-500 text-white px-6 py-2 rounded-full">Join ESDM</button>
+        </div>
+      </section>
+
+      {/* Product Categories */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold mb-4">Product Categories</h2>
+          <p className="text-gray-600 mb-8">Find millions of product options for your business needs</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {['Semiconductors & Integrated Circuits', 'Passive Components', 'Connectors & Interconnects', 'Electromechanical Components', 'Cables & Wiring', 'Test, Measurement & Tools', 'Development Kits & Evaluation Boards', 'Software & Design Tools', 'Power Components'].map((category, index) => (
+              <div key={index} className="border rounded-lg p-4 shadow-sm hover:shadow-md">
+                <h3 className="font-semibold">{category}</h3>
+                <p className="text-sm text-gray-600">Description of the category...</p>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="flex justify-between mt-8 space-x-4 px-4">
-          <div className="bg-white text-black rounded-lg shadow-md p-6 w-1/3 hover:shadow-lg transition-shadow">
-            <h2 className="font-bold text-xl mb-2">Explore ESDM Helper</h2>
-            <hr className="border-black mb-2" />
-            <ul className="list-disc pl-5">
-              <li>Find Suppliers</li>
-              <li>Insights</li>
-            </ul>
-          </div>
-          <div className="bg-white text-black rounded-lg shadow-md p-6 w-1/3 hover:shadow-lg transition-shadow">
-            <h2 className="font-bold text-xl mb-2">Trending News</h2>
-            <hr className="border-black mb-2" />
-            <ul className="list-disc pl-5">
-              <li>Electronics production must grow at 22% to hit $500 billion target</li>
-              <li>Electronic components subsidy policy: Centre, industry disagree over job creation</li>
-              <li>India's electronic manufacturing likely to double in the next five years: Govt sources</li>
-            </ul>
-          </div>
-          <div className="bg-white text-black rounded-lg shadow-md p-6 w-1/3 hover:shadow-lg transition-shadow">
-            <h2 className="font-bold text-xl mb-2">Testimonials</h2>
-            <hr className="border-black mb-2" />
-            <p>
-              "Working with this platform has streamlined our ESDM operations, making order management and tracking effortless. It’s boosted our productivity and reduced errors, helping us serve customers better. Highly recommended for any seller looking to optimize their workflow!"
-            </p>
-            <p className="mt-2 font-semibold">- Rajesh Verma, Operations Manager at TechWave Solutions</p>
+      </section>
+
+      {/* Featured Manufacturers */}
+      <section className="py-16 bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold mb-4">Featured Manufacturers</h2>
+          <div className="flex justify-around items-center">
+            {['logo1.png', 'logo2.png', 'logo3.png', 'logo4.png', 'logo5.png'].map((logo, index) => (
+              <img key={index} src={logo} alt="Manufacturer Logo" className="h-12" />
+            ))}
           </div>
         </div>
+      </section>
+
+      {/* Featured Products */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold mb-4">Featured Products</h2>
+          <p className="text-gray-600 mb-8">Most popular products & brand offerings for your business</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[
+              { name: 'Cable layering systems, electric', variations: 43 },
+              { name: 'Electric cable connections', variations: 23 },
+              { name: 'Automotive parts', variations: 78 },
+              { name: 'Anchors', variations: 4312 },
+              { name: 'Advertising materials', variations: 11 },
+              { name: 'Brazing, soldering and welding', variations: 147 },
+            ].map((product, index) => (
+              <div key={index} className="border rounded-lg p-4 shadow-sm hover:shadow-md">
+                <img src={`product${index + 1}.png`} alt={product.name} className="w-full h-32 object-cover mb-4" />
+                <h3 className="font-semibold">{product.name}</h3>
+                <p className="text-sm text-gray-600">{product.variations} Variations</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+        <Footer className="mt-8"/>
       </div>
+      
+      
     );
   };
   

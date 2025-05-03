@@ -16,42 +16,9 @@ function Overview() {
     setIsModalOpen(true);
     console.log("modal set true")
   };
-
-
-  // useEffect(() => {
-  //   const fetchUserMetadata = async () => {
-  //     try {
-  //       const response = await axios.get(`http://localhost:5001/api/user-metadata`, {
-  //         params: { userId: user.sub },
-  //       });
-  //       setUserMetadata(response.data);
-  //     } catch (error) {
-  //       console.error('Error fetching user metadata:', error);
-  //     }      
-  //   };
-
-  //   if (isAuthenticated) {
-  //     fetchUserMetadata();
-  //   }
-  // }, [isAuthenticated, user?.sub]);
-
-  // return (
-  //   isAuthenticated && (
-  //     <div>
-  //       <h2>User Metadata</h2>
-  //       {userMetadata ? (
-  //         <pre>{JSON.stringify(userMetadata, null, 2)}</pre>
-  //       ) : (
-  //         'No user metadata defined'
-  //       )}
-  //     </div>
-  //   )
-  // )
-
   useEffect( () => {
     async function fetch_userdata() {
       
-    
     try {
       const response = await axios.get('http://localhost:5001/auth/fetch-metadata', {
         params: { userId: user.sub },
@@ -62,12 +29,15 @@ function Overview() {
       
       setUserdata(response.data)
       console.log('User metadata:', response.data);
+
     } catch (error) {
       console.error('Error fetching user metadata:', error);
     }
   }
 fetch_userdata();
   },user)
+
+
 
 
   
@@ -78,6 +48,9 @@ fetch_userdata();
   const handleMeetingsClick = () => {
     // Navigate to the meetings page
   };
+  const handleAnalyticsClick = () => {
+    // Navigate to the analytics page
+  }
 
   return (
     <div className="bg-white min-h-screen p-8">
@@ -118,10 +91,15 @@ fetch_userdata();
           onLinkClick={handleMeetingsClick}
         />
          
-        <div className="bg-gray-200 p-4 rounded shadow-md">
+        {/* <div className="bg-gray-200 p-4 rounded shadow-md">
           <h3 className="text-lg font-bold">Analytics</h3>
           <p>Top Selling Products, Customer Demography, Sales</p>
-        </div>
+        </div> */}
+        <Card
+          title="Analytics"
+          content={<p>Top Selling Products, Customer Demography, Sales</p>}
+          linkText="View Analytics"
+          onLinkClick={handleAnalyticsClick}/>
       </div>
     </div>
   );

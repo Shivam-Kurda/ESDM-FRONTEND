@@ -1,210 +1,337 @@
-import React from 'react';
-import ProductsGrid from '../Components/ProductsGrid';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth0 } from '@auth0/auth0-react';
 import Header from '../Components/Header';
 
 function SupplierDetail() {
-    const suppliers = [{
-        id: 0,
-        name: 'Tejas Networks',
-        logo: 'link-to-logo-image',
-        summary: [
-            'A leading agro exporter from India supplying fresh, residue-free fruits and vegetables across several geographies.',
-            'Products include okra, mango, pomegranate, onion, chili, grapes, and banana.',
-            'Keeps pace with the latest technology and market requirements to ensure stability and sustainability towards fulfilling customer demands.',
-            'Established sourcing contracts directly with farmers to keep overall costs low.',
-            'Has in-house packaging and shipping facilities as well as a quality check division.',
-            'Practices contract farming to ensure own contracted produce and ensure supply volume.',
-        ],
-        companyDetails: {
-            country: 'India',
-            businessType: 'Trade',
-            yearEstablished: 2019,
-            numberOfEmployees: '11-50 Employees',
-            annualSalesRevenue: 'USD 1M~5M',
-            hasExportExperience: 'Yes',
-        },
+  const { cin: supplier_cin } = useParams();
+  const [supplier, setSupplier] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [quoteForm, setQuoteForm] = useState({
+    productName: '',
+    requirements: '',
+  });
+  const { user, getAccessTokenSilently } = useAuth0();
 
-        products: [
-            { 'name': 'PCB DESIGN', 'image': 'link-to-image-1', 'category': 'PCB Design', 'description': 'PCB Design' },
-            { 'name': 'PCB MANUFACTURING', 'image': 'link-to-image-2', 'category': 'PCB Manufacturing', 'description': 'PCB Manufacturing' },
-            { 'name': 'PCB ASSEMBLY', 'image': 'link-to-image-3', 'category': 'PCB Assembly', 'description': 'PCB Assembly' },
-            { 'name': 'PCB TESTING', 'image': 'link-to-image-4', 'category': 'PCB Testing', 'description': 'PCB Testing' },
-            { 'name': 'PCB PROTOTYPING', 'image': 'link-to-image-5', 'category': 'PCB Prototyping', 'description': 'PCB Prototyping' },
-            { 'name': 'PCB REPAIR', 'image': 'link-to-image-6', 'category': 'PCB Repair', 'description': 'PCB Repair' },
+  useEffect(() => {
+    const fetchSupplierDetails = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:5001/database/getCompanyDetails?cin=${supplier_cin}`
+        );
+        if (!response.ok) {
+           throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setSupplier(data);
+      } catch (error) {
+        console.error('Error fetching supplier details:', error);
+        setSupplier(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        ]
+    if (supplier_cin) {
+      fetchSupplierDetails();
+    } else {
+        setLoading(false);
+        console.error("Supplier CIN not provided in URL.");
+    }
+  }, [supplier_cin]);
 
-    },
-    {
-        id: 1,
-        name: 'Dixon Technologies',
-        logo: 'link-to-logo-image',
-        summary: [
-            'A leading agro exporter from India supplying fresh, residue-free fruits and vegetables across several geographies.',
-            'Products include okra, mango, pomegranate, onion, chili, grapes, and banana.',
-            'Keeps pace with the latest technology and market requirements to ensure stability and sustainability towards fulfilling customer demands.',
-            'Established sourcing contracts directly with farmers to keep overall costs low.',
-            'Has in-house packaging and shipping facilities as well as a quality check division.',
-            'Practices contract farming to ensure own contracted produce and ensure supply volume.',
-        ],
-        companyDetails: {
-            country: 'India',
-            businessType: 'Trade',
-            yearEstablished: 2019,
-            numberOfEmployees: '11-50 Employees',
-            annualSalesRevenue: 'USD 1M~5M',
-            hasExportExperience: 'Yes',
-        },
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    // This function is correct - ensures state updates on input change
+    setQuoteForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-        products: [
-            { 'name': 'PCB DESIGN', 'image': 'link-to-image-1', 'category': 'PCB Design', 'description': 'PCB Design' },
-            { 'name': 'PCB MANUFACTURING', 'image': 'link-to-image-2', 'category': 'PCB Manufacturing', 'description': 'PCB Manufacturing' },
-            { 'name': 'PCB ASSEMBLY', 'image': 'link-to-image-3', 'category': 'PCB Assembly', 'description': 'PCB Assembly' },
-            { 'name': 'PCB TESTING', 'image': 'link-to-image-4', 'category': 'PCB Testing', 'description': 'PCB Testing' },
-            { 'name': 'PCB PROTOTYPING', 'image': 'link-to-image-5', 'category': 'PCB Prototyping', 'description': 'PCB Prototyping' },
-            { 'name': 'PCB REPAIR', 'image': 'link-to-image-6', 'category': 'PCB Repair', 'description': 'PCB Repair' },
+  const handleQuoteSubmit = async (e) => {
+    e.preventDefault();
+    if (!user || !supplier) {
+        alert("User not logged in or supplier data missing.");
+        return;
+    }
+    try {
+       const accessToken = await getAccessTokenSilently({
+        //   audience: `YOUR_API_IDENTIFIER`, // Replace with your Auth0 API identifier if required by your backend API
+        //   scope: "read:current_user update:current_user_metadata", // Add necessary scopes if required
+       });
 
-        ]
+       console.log("Submitting quote for:", supplier.companyName, "by user:", user.sub);
+       console.log("Quote data:", quoteForm);
 
-    },
-    {
-        id: 2,
-        name: 'Bharat Electronics Limited',
-        logo: 'link-to-logo-image',
-        summary: [
-            'A leading agro exporter from India supplying fresh, residue-free fruits and vegetables across several geographies.',
-            'Products include okra, mango, pomegranate, onion, chili, grapes, and banana.',
-            'Keeps pace with the latest technology and market requirements to ensure stability and sustainability towards fulfilling customer demands.'],
-        companyDetails: {
-            country: 'India',
-            businessType: 'Trade',
-            yearEstablished: 2019,
-            numberOfEmployees: '11-50 Employees',
-            annualSalesRevenue: 'USD 1M~5M',
-            hasExportExperience: 'Yes',
-        },
+       const response = await axios.post(
+         `http://127.0.0.1:5001/database/addQuotationRequestToCompany`,
+         {
+            SupplierCompany: supplier.companyName,
+            SupplierCin: supplier.cin,
+            ...quoteForm,
+         },
+         {
+           params: { userId: user.sub },
+           headers: {
+             'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+             'Content-Type': 'application/json',
+           },
+         }
+       );
 
-        products: [
-            { 'name': 'PCB DESIGN', 'image': 'link-to-image-1', 'category': 'PCB Design', 'description': 'PCB Design' },
-            { 'name': 'PCB MANUFACTURING', 'image': 'link-to-image-2', 'category': 'PCB Manufacturing', 'description': 'PCB Manufacturing' },
-            { 'name': 'PCB ASSEMBLY', 'image': 'link-to-image-3', 'category': 'PCB Assembly', 'description': 'PCB Assembly' },
-            { 'name': 'PCB TESTING', 'image': 'link-to-image-4', 'category': 'PCB Testing', 'description': 'PCB Testing' },
-            { 'name': 'PCB PROTOTYPING', 'image': 'link-to-image-5', 'category': 'PCB Prototyping', 'description': 'PCB Prototyping' },
-            { 'name': 'PCB REPAIR', 'image': 'link-to-image-6', 'category': 'PCB Repair', 'description': 'PCB Repair' },
+       if (response.status === 201 || response.status === 200) {
+         alert('Quotation request submitted successfully!');
+         setShowModal(false);
+         setQuoteForm({ productName: '', requirements: '' });
+       } else {
+          const errorData = response.data;
+          alert(`Failed to submit request: ${errorData?.message || response.statusText}`);
+       }
+    } catch (error) {
+       console.error('Error submitting quote:', error);
+       if (error.response) {
+          console.error("Error response data:", error.response.data);
+          console.error("Error response status:", error.response.status);
+          alert(`Error: ${error.response.data?.message || error.message}`);
+       } else if (error.request) {
+          console.error("Error request:", error.request);
+          alert("Error: Could not reach the server. Please try again later.");
+       } else {
+          console.error("Error message:", error.message);
+          alert(`Error: ${error.message}`);
+       }
+    }
+  };
 
-        ]
-    }];
-    const supplierid=useParams().id
-
-    const supplier = suppliers.find(supplier => supplier.id == supplierid);
+  // --- Loading and Error States --- (No changes needed here)
+  if (loading) {
     return (
-        
-        <div className="bg-gray-100 min-h-screen">
-            <Header />
-            <div className="flex items-center mb-8 mt-4">
-                <img src={supplier.logo} alt={supplier.name} className="h-16 w-16 mr-4" />
-                <div>
-                    <h1 className="text-3xl font-bold">{supplier.name}</h1>
-                    <p className="text-sm text-gray-600">{supplier.status}</p>
-                    <p className="text-sm text-gray-600">{supplier.followers} Followers</p>
-                </div>
+      <div className="flex justify-center items-center min-h-screen bg-white text-blue-700 font-medium">
+        Loading supplier details...
+      </div>
+    );
+  }
+
+  if (!supplier) {
+    return (
+      <div className="flex flex-col min-h-screen bg-white">
+          <Header />
+          <div className="flex justify-center items-center flex-grow text-red-600 font-medium">
+             Supplier details not found or could not be loaded. (CIN: {supplier_cin || 'Not Provided'})
+          </div>
+      </div>
+    );
+  }
+
+  // --- Main Return ---
+  return (
+    // *** FIX: Removed conditional pointer-events-none from this div ***
+    <div className="bg-white min-h-screen text-gray-800 font-sans relative">
+       {/* Wrap content that should be blurred */}
+      <div
+        className={`transition-filter duration-300 ease-in-out ${
+          showModal ? 'filter blur-sm' : 'filter-none' // Blur effect still applied here
+        }`}
+      >
+        <Header />
+        <div className="max-w-7xl mx-auto p-6">
+          {/* Top Section: Logo, Name, Ask Quote Button */}
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center">
+              <img
+                src={supplier.logo || '/placeholder-logo.png'}
+                alt={`${supplier.companyName} logo`}
+                className="h-20 w-20 rounded-full object-cover mr-6 border border-gray-300"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-blue-800 mb-1">
+                  {supplier.companyName}
+                </h1>
+                <p className="text-sm text-gray-500">CIN: {supplier.cin}</p>
+                <p className="text-sm text-gray-500">
+                  Country: {supplier.country}
+                </p>
+              </div>
             </div>
-            <nav className="mb-8">
-                <ul className="flex space-x-4 border-b-2 border-gray-300 pb-2">
-                    <li>
-                        <a href="#overview" className="text-black font-semibold hover:font-bold hover:text-gray-700">
-                            Overview
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#products" className="text-gray-500 hover:font-bold hover:text-gray-700">
-                            Products (16)
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#certifications" className="text-gray-500 hover:font-bold hover:text-gray-700">
-                            Certifications
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#facilities" className="text-gray-500 hover:font-bold hover:text-gray-700">
-                            Facilities
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#export" className="text-gray-500 hover:font-bold hover:text-gray-700">
-                            Export
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#trade-shows" className="text-gray-500 hover:font-bold hover:text-gray-700">
-                            Trade Shows
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#posts" className="text-gray-500 hover:font-bold hover:text-gray-700">
-                            Posts
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#track-record" className="text-gray-500 hover:font-bold hover:text-gray-700">
-                            Track Record
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            <div className="flex">
-                <div className="w-2/3 pr-8">
-                    <section id="overview" className="mb-8">
-                        <h2 className="text-xl font-bold mb-4">Summary</h2>
-                        <ul className="list-disc pl-5 mb-8">
-                            {supplier.summary.map((item, index) => (
-                                <li key={index} className="text-gray-700 mb-2">{item}</li>
-                            ))}
-                        </ul>
-                    </section>
-                    <ProductsGrid listitems={supplier.products} />
-                    <section id="certifications" className="mb-8">
-                        <h2 className="text-xl font-bold mb-4">Certifications</h2>
-                        {/* List certifications here */}
-                    </section>
-                    <section id="facilities" className="mb-8">
-                        <h2 className="text-xl font-bold mb-4">Facilities</h2>
-                        {/* List facilities here */}
-                    </section>
-                    <section id="export" className="mb-8">
-                        <h2 className="text-xl font-bold mb-4">Export</h2>
-                        {/* List export details here */}
-                    </section>
-                    <section id="trade-shows" className="mb-8">
-                        <h2 className="text-xl font-bold mb-4">Trade Shows</h2>
-                        {/* List trade shows here */}
-                    </section>
-                    <section id="posts" className="mb-8">
-                        <h2 className="text-xl font-bold mb-4">Posts</h2>
-                        {/* List posts here */}
-                    </section>
-                    <section id="track-record" className="mb-8">
-                        <h2 className="text-xl font-bold mb-4">Track Record</h2>
-                        {/* List track record here */}
-                    </section>
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow-sm font-medium transition duration-200 cursor-pointer"
+              onClick={() => setShowModal(true)}
+              aria-label="Ask for Quote"
+            >
+              Ask for Quote
+            </button>
+          </div>
+
+          {/* Navigation (Optional) */}
+          <nav className="mb-6 border-b pb-2">
+            <ul className="flex space-x-6 text-sm text-gray-600">
+              {[
+                'Overview', 'Products', 'Certifications', 'Facilities',
+                'Export', 'Trade Shows', 'Posts', 'Track Record',
+              ].map((item, idx) => (
+                <li key={idx}>
+                  <a
+                    href={`#${item.toLowerCase().replace(' ', '-')}`}
+                    className="hover:text-blue-600 cursor-pointer"
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Main Content: Products and Company Details */}
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Products Section */}
+            <div className="w-full lg:w-2/3">
+              <section id="products" className="mb-10">
+                <h2 className="text-2xl font-semibold text-blue-700 mb-4">
+                  Products
+                </h2>
+                {!supplier.products || supplier.products.length === 0 ? (
+                  <p className="text-gray-500">No products listed.</p>
+                ) : (
+                  <div className="space-y-6">
+                    {supplier.products.map((product, idx) => (
+                      <div
+                        key={product.id || idx}
+                        className="border border-blue-100 rounded-xl shadow-sm p-5 hover:shadow-md transition duration-200"
+                      >
+                        <h3 className="text-lg font-bold text-blue-800 mb-1">
+                          {product.ProductName}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-2">
+                          Category: {product.Category}
+                        </p>
+                        <p className="text-sm mb-2">{product.Description}</p>
+                        <div className="text-sm grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
+                          <p>
+                            <strong>Specifications:</strong>{' '}
+                            {product.Specifications || 'N/A'}
+                          </p>
+                          <p>
+                            <strong>Price:</strong> {product.Price ? `₹${product.Price}` : 'N/A'}
+                          </p>
+                          <p>
+                            <strong>Lead Time:</strong> {product.LeadTime || 'N/A'}
+                          </p>
+                          <p>
+                            <strong>Min Order Qty:</strong>{' '}
+                            {product.MinimumOrderWQuantity || 'N/A'}
+                          </p>
+                          <p className="md:col-span-2">
+                            <strong>Certifications:</strong>{' '}
+                            {product.Certifications || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>
+
+            {/* Company Details Sidebar */}
+            <aside className="w-full lg:w-1/3 bg-gray-50 p-5 rounded-xl border border-gray-200 self-start">
+              <h2 className="text-xl font-semibold text-blue-700 mb-4">
+                Company Details
+              </h2>
+              <ul className="text-sm space-y-2 text-gray-700">
+                <li><strong>Name:</strong> {supplier.companyName}</li>
+                <li><strong>Country:</strong> {supplier.country}</li>
+                <li><strong>CIN:</strong> {supplier.cin}</li>
+                <li>
+                  <strong>Year Established:</strong>{' '}
+                  {supplier.incorporationDate
+                    ? new Date(supplier.incorporationDate).getFullYear()
+                    : 'N/A'}
+                </li>
+                 <li><strong>Legal Status:</strong> {supplier.companyStatus || 'N/A'}</li>
+                 <li><strong>Address:</strong> {supplier.registeredAddress || 'N/A'}</li>
+                <li><strong>Tax Number (GSTIN):</strong> {supplier.taxNumber || 'N/A'}</li>
+              </ul>
+            </aside>
+          </div>
+        </div>
+      </div> {/* End of blur wrapper */}
+
+      {/* --- Modal Section --- */}
+      {/* This structure correctly handles pointer events now */}
+      {showModal && ( // Conditionally render the modal
+        <div
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${
+            showModal ? 'opacity-100' : 'opacity-0 pointer-events-none' // pointer-events-none only when hidden
+            }`}
+            aria-labelledby="modal-title"
+            role="dialog"
+            aria-modal="true"
+        >
+            {/* Modal Content Box - Animation applied here */}
+            <div
+            className={`bg-white rounded-xl shadow-xl max-w-md w-full p-6 transition-transform duration-300 ease-in-out transform ${
+                showModal ? 'scale-100' : 'scale-95' // Scale animation
+            }`}
+            >
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-4">
+                <h3 id="modal-title" className="text-xl font-semibold text-blue-700">
+                Request a Quote from {supplier.companyName}
+                </h3>
+                <button
+                className="text-gray-500 hover:text-gray-800 text-2xl leading-none cursor-pointer"
+                onClick={() => setShowModal(false)}
+                aria-label="Close modal"
+                >
+                &times;
+                </button>
+            </div>
+
+            {/* Modal Form - Inputs should be interactive now */}
+            <form onSubmit={handleQuoteSubmit} className="space-y-4">
+                <div>
+                <label htmlFor="productName" className="block text-sm font-medium mb-1 text-gray-700">
+                    Product Name / Service
+                </label>
+                <input
+                    type="text"
+                    id="productName"
+                    name="productName"
+                    value={quoteForm.productName} // Controlled input value
+                    onChange={handleInputChange}   // State update handler
+                    required
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="e.g., PCB Manufacturing , PCB Assembly, etc."
+                />
                 </div>
-                <div className="w-1/3 bg-white p-4 rounded shadow">
-                    <h2 className="text-lg font-bold mb-4">Company Details</h2>
-                    <ul className="text-gray-700">
-                        <li><strong>Name:</strong> {supplier.name}</li>
-                        <li><strong>Country:</strong> {supplier.companyDetails.country}</li>
-                        <li><strong>Business Type:</strong> {supplier.companyDetails.businessType}</li>
-                        <li><strong>Year Established:</strong> {supplier.companyDetails.yearEstablished}</li>
-                        <li><strong>Number of Employees:</strong> {supplier.companyDetails.numberOfEmployees}</li>
-                        <li><strong>Annual Sales Revenue:</strong> {supplier.companyDetails.annualSalesRevenue}</li>
-                        <li><strong>Has Export Experience:</strong> {supplier.companyDetails.hasExportExperience}</li>
-                    </ul>
+                <div>
+                <label htmlFor="requirements" className="block text-sm font-medium mb-1 text-gray-700">
+                    Specific Requirements (Quantity, Specs, etc.)
+                </label>
+                <textarea
+                    id="requirements"
+                    name="requirements"
+                    value={quoteForm.requirements} // Controlled input value
+                    onChange={handleInputChange}    // State update handler
+                    required
+                    rows={4}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-vertical"
+                    placeholder="Describe your needs, e.g., 'Need 500 pcs of 4-layer PCB with specific dimensions and components.'"
+                />
                 </div>
+                <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition w-full font-medium cursor-pointer"
+                >
+                    Submit Request
+                </button>
+            </form>
             </div>
         </div>
-    );
+      )} {/* End of conditional modal rendering */}
+    </div> // End of main component div
+  );
 }
 
 export default SupplierDetail;

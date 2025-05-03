@@ -7,10 +7,10 @@ const ProductsGrid = ({ listitems }) => {
       <div className="grid grid-cols-3 gap-4">
         {listitems.map((product, index) => (
           <div key={index} className="border p-4">
-            <img src={product.image} alt={product.name} className="w-full h-48 object-cover mb-4" />
-            <h3 className="text-lg font-semibold">{product.name}</h3>
-            <p className="text-sm text-gray-600">{product.category}</p>
-            <p className="text-sm text-gray-600">{product.description}</p>
+            <img src={product.image} alt={product.ProductName} className="w-full h-48 object-cover mb-4" />
+            <h3 className="text-lg font-semibold">{product.ProductName}</h3>
+            <p className="text-sm text-gray-600">{product.Category}</p>
+            <p className="text-sm text-gray-600">{product.Description}</p>
           </div>
         ))}
       </div>
