@@ -11,8 +11,9 @@ function SupplierDetail() {
   const [showModal, setShowModal] = useState(false);
   const [quoteForm, setQuoteForm] = useState({
     productName: '',
-    requirements: '',
+    // requirements: '',
   });
+  const [requirementsFile, setRequirementsFile] = useState(null);
   const { user, getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
@@ -23,7 +24,7 @@ function SupplierDetail() {
           `http://127.0.0.1:5001/database/getCompanyDetails?cin=${supplier_cin}`
         );
         if (!response.ok) {
-           throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         setSupplier(data);
@@ -38,8 +39,8 @@ function SupplierDetail() {
     if (supplier_cin) {
       fetchSupplierDetails();
     } else {
-        setLoading(false);
-        console.error("Supplier CIN not provided in URL.");
+      setLoading(false);
+      console.error("Supplier CIN not provided in URL.");
     }
   }, [supplier_cin]);
 
@@ -48,59 +49,68 @@ function SupplierDetail() {
     // This function is correct - ensures state updates on input change
     setQuoteForm((prev) => ({ ...prev, [name]: value }));
   };
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]; // first (and only) file
+    setRequirementsFile(file);
+  };
 
   const handleQuoteSubmit = async (e) => {
     e.preventDefault();
     if (!user || !supplier) {
-        alert("User not logged in or supplier data missing.");
-        return;
+      alert("User not logged in or supplier data missing.");
+      return;
     }
     try {
-       const accessToken = await getAccessTokenSilently({
+      const accessToken = await getAccessTokenSilently({
         //   audience: `YOUR_API_IDENTIFIER`, // Replace with your Auth0 API identifier if required by your backend API
         //   scope: "read:current_user update:current_user_metadata", // Add necessary scopes if required
-       });
+      });
 
-       console.log("Submitting quote for:", supplier.companyName, "by user:", user.sub);
-       console.log("Quote data:", quoteForm);
+      console.log("Submitting quote for:", supplier.companyName, "by user:", user.sub);
+      console.log("Quote data:", quoteForm);
+      const fd = new FormData();
+      fd.append('SupplierCompany', supplier.companyName);
+      fd.append('SupplierCin', supplier.cin);
+      fd.append('productName', quoteForm.productName);
+      fd.append('requirements', requirementsFile);
+      const response = await axios.post(
+        `http://127.0.0.1:5001/database/addQuotationRequestToCompany`,
+        //  {
+        //     SupplierCompany: supplier.companyName,
+        //     SupplierCin: supplier.cin,
+        //     ...quoteForm,
+        //  },
+        fd,
+        {
+          params: { userId: user.sub },
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            // 'Content-Type': 'application/json',
+          },
+        }
+      );
 
-       const response = await axios.post(
-         `http://127.0.0.1:5001/database/addQuotationRequestToCompany`,
-         {
-            SupplierCompany: supplier.companyName,
-            SupplierCin: supplier.cin,
-            ...quoteForm,
-         },
-         {
-           params: { userId: user.sub },
-           headers: {
-             'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-             'Content-Type': 'application/json',
-           },
-         }
-       );
-
-       if (response.status === 201 || response.status === 200) {
-         alert('Quotation request submitted successfully!');
-         setShowModal(false);
-         setQuoteForm({ productName: '', requirements: '' });
-       } else {
-          const errorData = response.data;
-          alert(`Failed to submit request: ${errorData?.message || response.statusText}`);
-       }
+      if (response.status === 201 || response.status === 200) {
+        alert('Quotation request submitted successfully!');
+        setShowModal(false);
+        setQuoteForm({ productName: '', requirements: '' });
+      } else {
+        const errorData = response.data;
+        alert(`Failed to submit request: ${errorData?.message || response.statusText}`);
+      }
     } catch (error) {
-       console.error('Error submitting quote:', error);
-       if (error.response) {
-          console.error("Error response data:", error.response.data);
-          console.error("Error response status:", error.response.status);
-          alert(`Error: ${error.response.data?.message || error.message}`);
-       } else if (error.request) {
-          console.error("Error request:", error.request);
-          alert("Error: Could not reach the server. Please try again later.");
-       } else {
-          console.error("Error message:", error.message);
-          alert(`Error: ${error.message}`);
-       }
+      console.error('Error submitting quote:', error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+        alert(`Error: ${error.response.data?.message || error.message}`);
+      } else if (error.request) {
+        console.error("Error request:", error.request);
+        alert("Error: Could not reach the server. Please try again later.");
+      } else {
+        console.error("Error message:", error.message);
+        alert(`Error: ${error.message}`);
+      }
     }
   };
 
@@ -116,10 +126,10 @@ function SupplierDetail() {
   if (!supplier) {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-          <Header />
-          <div className="flex justify-center items-center flex-grow text-red-600 font-medium">
-             Supplier details not found or could not be loaded. (CIN: {supplier_cin || 'Not Provided'})
-          </div>
+        <Header />
+        <div className="flex justify-center items-center flex-grow text-red-600 font-medium">
+          Supplier details not found or could not be loaded. (CIN: {supplier_cin || 'Not Provided'})
+        </div>
       </div>
     );
   }
@@ -128,11 +138,10 @@ function SupplierDetail() {
   return (
     // *** FIX: Removed conditional pointer-events-none from this div ***
     <div className="bg-white min-h-screen text-gray-800 font-sans relative">
-       {/* Wrap content that should be blurred */}
+      {/* Wrap content that should be blurred */}
       <div
-        className={`transition-filter duration-300 ease-in-out ${
-          showModal ? 'filter blur-sm' : 'filter-none' // Blur effect still applied here
-        }`}
+        className={`transition-filter duration-300 ease-in-out ${showModal ? 'filter blur-sm' : 'filter-none' // Blur effect still applied here
+          }`}
       >
         <Header />
         <div className="max-w-7xl mx-auto p-6">
@@ -248,8 +257,8 @@ function SupplierDetail() {
                     ? new Date(supplier.incorporationDate).getFullYear()
                     : 'N/A'}
                 </li>
-                 <li><strong>Legal Status:</strong> {supplier.companyStatus || 'N/A'}</li>
-                 <li><strong>Address:</strong> {supplier.registeredAddress || 'N/A'}</li>
+                <li><strong>Legal Status:</strong> {supplier.companyStatus || 'N/A'}</li>
+                <li><strong>Address:</strong> {supplier.registeredAddress || 'N/A'}</li>
                 <li><strong>Tax Number (GSTIN):</strong> {supplier.taxNumber || 'N/A'}</li>
               </ul>
             </aside>
@@ -261,51 +270,48 @@ function SupplierDetail() {
       {/* This structure correctly handles pointer events now */}
       {showModal && ( // Conditionally render the modal
         <div
-            className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${
-            showModal ? 'opacity-100' : 'opacity-0 pointer-events-none' // pointer-events-none only when hidden
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${showModal ? 'opacity-100' : 'opacity-0 pointer-events-none' // pointer-events-none only when hidden
             }`}
-            aria-labelledby="modal-title"
-            role="dialog"
-            aria-modal="true"
+          aria-labelledby="modal-title"
+          role="dialog"
+          aria-modal="true"
         >
-            {/* Modal Content Box - Animation applied here */}
-            <div
-            className={`bg-white rounded-xl shadow-xl max-w-md w-full p-6 transition-transform duration-300 ease-in-out transform ${
-                showModal ? 'scale-100' : 'scale-95' // Scale animation
-            }`}
-            >
+          {/* Modal Content Box - Animation applied here */}
+          <div
+            className={`bg-white rounded-xl shadow-xl max-w-md w-full p-6 transition-transform duration-300 ease-in-out transform ${showModal ? 'scale-100' : 'scale-95' // Scale animation
+              }`}
+          >
             {/* Modal Header */}
             <div className="flex justify-between items-center mb-4">
-                <h3 id="modal-title" className="text-xl font-semibold text-blue-700">
+              <h3 id="modal-title" className="text-xl font-semibold text-blue-700">
                 Request a Quote from {supplier.companyName}
-                </h3>
-                <button
+              </h3>
+              <button
                 className="text-gray-500 hover:text-gray-800 text-2xl leading-none cursor-pointer"
                 onClick={() => setShowModal(false)}
                 aria-label="Close modal"
-                >
+              >
                 &times;
-                </button>
+              </button>
             </div>
-
             {/* Modal Form - Inputs should be interactive now */}
-            <form onSubmit={handleQuoteSubmit} className="space-y-4">
-                <div>
+            <form onSubmit={handleQuoteSubmit} className="space-y-4" encType="multipart/form-data">
+              <div>
                 <label htmlFor="productName" className="block text-sm font-medium mb-1 text-gray-700">
-                    Product Name / Service
+                  
                 </label>
                 <input
-                    type="text"
-                    id="productName"
-                    name="productName"
-                    value={quoteForm.productName} // Controlled input value
-                    onChange={handleInputChange}   // State update handler
-                    required
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    placeholder="e.g., PCB Manufacturing , PCB Assembly, etc."
+                  type="text"
+                  id="productName"
+                  name="productName"
+                  value={quoteForm.productName} // Controlled input value
+                  onChange={handleInputChange}   // State update handler
+                  required
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  placeholder="e.g., PCB Manufacturing , PCB Assembly, etc."
                 />
-                </div>
-                <div>
+              </div>
+              {/* <div>
                 <label htmlFor="requirements" className="block text-sm font-medium mb-1 text-gray-700">
                     Specific Requirements (Quantity, Specs, etc.)
                 </label>
@@ -319,15 +325,39 @@ function SupplierDetail() {
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-vertical"
                     placeholder="Describe your needs, e.g., 'Need 500 pcs of 4-layer PCB with specific dimensions and components.'"
                 />
-                </div>
-                <button
-                    type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition w-full font-medium cursor-pointer"
+                </div> */}
+              <div>
+                <label
+                  htmlFor="requirementsFile"
+                  className="block text-sm font-medium mb-1 text-gray-700"
                 >
-                    Submit Request
-                </button>
+                  Requirements File (CSV)
+                </label>
+                <input
+                  type="file"
+                  id="requirementsFile"
+                  name="requirementsFile"
+                  accept=".csv"
+                  onChange={handleFileChange}
+                  required
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
+                {requirementsFile && (
+                  <p className="text-xs mt-1 text-gray-600">
+                    Selected: {requirementsFile.name}
+                  </p>
+                )}
+              </div>
+
+
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition w-full font-medium cursor-pointer"
+              >
+                Submit Request
+              </button>
             </form>
-            </div>
+          </div>
         </div>
       )} {/* End of conditional modal rendering */}
     </div> // End of main component div
